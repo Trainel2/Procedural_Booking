@@ -1,0 +1,270 @@
+2E4Z-76F8-7EF7-1EA8-D8E7-20E6
+
+Activation ได้แล้วคับหลังจากที่ลองผิดลองถูกอยู่ตั้งนาน ผมจะบอกวิธีให้นะคับ (สำหรับคนที่ไม่รู้นะคับ)
+
+1. ปิดเน็ตคับ
+2. เปิดโปรแกรม Autocad 2014 ที่เราติดตั้งนั้นแหละคับ(มันจะให้ คลิกที่ปุ่ม Activate ยังไม่ต้องคลิกนะคับ)
+3. เปิดโปรแกรม xf-adsk64.exe (ถ้าใช้ 32bit ก็ใช้ xf-adsk32.exe นะคับ) 
+4. กด Patch คับ แล้วอย่างเพิ่งปิดโปรแกรมนะคับ
+5. ไปที่ Autocad 2014 คลิกที่ Activate
+6. copy Request code: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx แล้วนำไปใส่ที่โปรแกรม xf-adsk64.exe ในช่องRequest: แล้วกดปุ่ม Generate ให้ Copy Code ที่ได้ในช่อง Activation: 
+7. ไปที่ Autocad 2014 ที่เรารอ Activate อยู่ 
+8. คลิกที่ปุ่ม I have an Activation code form autodesk
+9. วางได้เลยคับ ถ้ามันไม่เต็มถึงช่องที่ 16 ไม่ต้องกังวลคับ คลิก Next ได้เลยแค่นี้ก็ Activate เรียบร้อยแล้วคับ 
+
+หวังว่าคงมีประโยชน์มั้งนะคับ
+
+ขอเพิ่มเติมอีกนิด ครับ
+ขณะที่เปิดโปรแกรม xf-adsk64.exe (ถ้าใช้ 32bit ก็ใช้ xf-adsk32.exe นะคับ) 
+ให้คลิกขวาเลือกที่ Run as Administrator ครับ
+
+ขั้นตอน ตามของ comment ของ ddddoc ได้เลยครับ 
+  crack ผ่านแน่นอน
+
+
+
+
+Imports Microsoft.Reporting.WinForms
+Imports System.Data.SqlClient
+
+Public Class frm_rpt_device
+    Private adapter As DS_reportDeviceTableAdapters.DT_DeviceTableAdapter = New DS_reportDeviceTableAdapters.DT_DeviceTableAdapter
+    Private table As New DS_reportDevice.DT_DeviceDataTable()
+    Private MyNewDataSource As New ReportDataSource("DataSet1", DirectCast(table, DataTable))
+
+    Private Sub show_combobox_department()
+        sql = "select * from department order by department_name"
+        cmd = New SqlCommand(sql, cn)
+        dr = cmd.ExecuteReader
+        If dr.HasRows Then
+            dt = New DataTable
+            dt.Load(dr)
+            With cmb_depart
+                .BeginUpdate()
+                .DisplayMember = ("department_name")
+                .ValueMember = ("department_id")
+                .DataSource = dt
+                .EndUpdate()
+            End With
+        Else
+            cmb_depart.DataSource = Nothing
+        End If
+        dr.Close()
+        cmb_depart.SelectedValue = -1
+    End Sub
+
+    Private Sub show_combobox_type()
+        sql = "select * from device_type order by device_type_name"
+        cmd = New SqlCommand(sql, cn)
+        dr = cmd.ExecuteReader
+        If dr.HasRows Then
+            dt = New DataTable
+            dt.Load(dr)
+            With cmb_type
+                .BeginUpdate()
+                .DisplayMember = ("device_type_name")
+                .ValueMember = ("device_type_id")
+                .DataSource = dt
+                .EndUpdate()
+            End With
+        Else
+            cmb_type.DataSource = Nothing
+        End If
+        dr.Close()
+        cmb_type.SelectedValue = -1
+    End Sub
+
+    Private Sub clear_data()
+        cmb_depart.SelectedValue = -1
+        cmb_type.SelectedValue = -1
+        rdo_lose.Checked = False
+        rdo_use.Checked = False
+
+    End Sub
+
+    Private Sub test_Load(sender As System.Object, e As System.EventArgs) Handles MyBase.Load
+        ConnectDatabase()
+        show_combobox_department()
+        show_combobox_type()
+        Me.ReportViewer1.SetDisplayMode(DisplayMode.PrintLayout)
+        Me.ReportViewer1.ZoomMode = ZoomMode.PageWidth
+
+    End Sub
+
+    Private Sub ReportViewer1_Load(sender As System.Object, e As System.EventArgs) Handles ReportViewer1.Load
+        adapter.FillDevice(table)
+        Me.ReportViewer1.LocalReport.ReportPath = "D:\Train\Computer_IT_sol\Computer_IT\rpt_device.rdlc"
+        Me.ReportViewer1.LocalReport.DataSources.Clear()
+        Me.ReportViewer1.LocalReport.DataSources.Add(MyNewDataSource)
+        Me.ReportViewer1.LocalReport.Refresh()
+        Me.ReportViewer1.RefreshReport()
+    End Sub
+
+    Private Sub Button1_Click(sender As System.Object, e As System.EventArgs) Handles btn_search.Click
+
+        Dim choose As Integer = 0
+        'เลือกแผนก
+        If Not cmb_depart.Text = "" And cmb_type.Text = "" And rdo_lose.Checked = False And rdo_use.Checked = False Then
+            choose = 1
+            'เลือกประเภท
+        ElseIf cmb_depart.Text = "" And Not cmb_type.Text = "" And rdo_lose.Checked = False And rdo_use.Checked = False Then
+            choose = 2
+            'เลือกสถานะ ชำรุด
+        ElseIf cmb_depart.Text = "" And cmb_type.Text = "" And rdo_lose.Checked = True And rdo_use.Checked = False Then
+            choose = 3
+            'เลือกสถานะ ใช้งาน
+        ElseIf cmb_depart.Text = "" And cmb_type.Text = "" And rdo_lose.Checked = False And rdo_use.Checked = True Then
+            choose = 4
+            'เลือกแผนก และ ประเภท
+        ElseIf Not cmb_depart.Text = "" And Not cmb_type.Text = "" And rdo_lose.Checked = False And rdo_use.Checked = False Then
+            choose = 5
+            'เลือกแผนก ประเภท และสถานะชำรุด
+        ElseIf Not cmb_depart.Text = "" And Not cmb_type.Text = "" And rdo_lose.Checked = True And rdo_use.Checked = False Then
+            choose = 6
+            'เลือกแผนก ประเภท และสถานะใช้งาน
+        ElseIf Not cmb_depart.Text = "" And Not cmb_type.Text = "" And rdo_lose.Checked = False And rdo_use.Checked = True Then
+            choose = 7
+            'เลือก แผนก และสถานะชำรุด
+        ElseIf Not cmb_depart.Text = "" And cmb_type.Text = "" And rdo_lose.Checked = True And rdo_use.Checked = False Then
+            choose = 8
+            'เลือก แผนก และสถานะใช้งาน
+        ElseIf Not cmb_depart.Text = "" And cmb_type.Text = "" And rdo_lose.Checked = False And rdo_use.Checked = True Then
+            choose = 9
+            'เลือกประเภท และสถานะชำรุด
+        ElseIf cmb_depart.Text = "" And Not cmb_type.Text = "" And rdo_lose.Checked = True And rdo_use.Checked = False Then
+            choose = 10
+            'เลือกประเภท และสถานะชำรุด
+        ElseIf cmb_depart.Text = "" And Not cmb_type.Text = "" And rdo_lose.Checked = False And rdo_use.Checked = True Then
+            choose = 11
+
+
+        End If
+
+        Select Case choose
+            Case 0
+                'ไม่ได้เลือก
+                adapter.FillDevice(table)
+                Me.ReportViewer1.LocalReport.ReportPath = "D:\Train\Computer_IT_sol\Computer_IT\rpt_device.rdlc"
+                Me.ReportViewer1.LocalReport.DataSources.Clear()
+                Me.ReportViewer1.LocalReport.DataSources.Add(MyNewDataSource)
+                Me.ReportViewer1.LocalReport.Refresh()
+                Me.ReportViewer1.RefreshReport()
+                clear_data()
+                choose = 0
+            Case 1
+                'เลือกแค่ แผนก
+                adapter.FillByDepart(table, cmb_depart.Text)
+                Me.ReportViewer1.LocalReport.ReportPath = "D:\Train\Computer_IT_sol\Computer_IT\rpt_device.rdlc"
+                Me.ReportViewer1.LocalReport.DataSources.Clear()
+                Me.ReportViewer1.LocalReport.DataSources.Add(MyNewDataSource)
+                Me.ReportViewer1.LocalReport.Refresh()
+                Me.ReportViewer1.RefreshReport()
+                clear_data()
+                choose = 0
+            Case 2
+                'เลือกแค่ ประเภท
+                adapter.FillByType(table, cmb_type.Text)
+                Me.ReportViewer1.LocalReport.ReportPath = "D:\Train\Computer_IT_sol\Computer_IT\rpt_device.rdlc"
+                Me.ReportViewer1.LocalReport.DataSources.Clear()
+                Me.ReportViewer1.LocalReport.DataSources.Add(MyNewDataSource)
+                Me.ReportViewer1.LocalReport.Refresh()
+                Me.ReportViewer1.RefreshReport()
+                clear_data()
+                choose = 0
+            Case 3
+                'เลือกแค่ สถานะชำรุด
+                adapter.FillByStatus(table, 1)
+                Me.ReportViewer1.LocalReport.ReportPath = "D:\Train\Computer_IT_sol\Computer_IT\rpt_device.rdlc"
+                Me.ReportViewer1.LocalReport.DataSources.Clear()
+                Me.ReportViewer1.LocalReport.DataSources.Add(MyNewDataSource)
+                Me.ReportViewer1.LocalReport.Refresh()
+                Me.ReportViewer1.RefreshReport()
+                clear_data()
+                choose = 0
+            Case 4
+                'เลือกแค่ สถานะใช้งาน
+                adapter.FillByStatus(table, 0)
+                Me.ReportViewer1.LocalReport.ReportPath = "D:\Train\Computer_IT_sol\Computer_IT\rpt_device.rdlc"
+                Me.ReportViewer1.LocalReport.DataSources.Clear()
+                Me.ReportViewer1.LocalReport.DataSources.Add(MyNewDataSource)
+                Me.ReportViewer1.LocalReport.Refresh()
+                Me.ReportViewer1.RefreshReport()
+                clear_data()
+                choose = 0
+            Case 5
+                'เลือกแผนก และ ประเภท
+                adapter.FillByDepartType(table, cmb_depart.Text, cmb_type.Text)
+                Me.ReportViewer1.LocalReport.ReportPath = "D:\Train\Computer_IT_sol\Computer_IT\rpt_device.rdlc"
+                Me.ReportViewer1.LocalReport.DataSources.Clear()
+                Me.ReportViewer1.LocalReport.DataSources.Add(MyNewDataSource)
+                Me.ReportViewer1.LocalReport.Refresh()
+                Me.ReportViewer1.RefreshReport()
+                clear_data()
+                choose = 0
+            Case 6
+                'เลือกแผนก ประเภท และสถานะชำรุด
+                adapter.FillByDepartTypeStatus(table, cmb_depart.Text, cmb_type.Text, 1)
+                Me.ReportViewer1.LocalReport.ReportPath = "D:\Train\Computer_IT_sol\Computer_IT\rpt_device.rdlc"
+                Me.ReportViewer1.LocalReport.DataSources.Clear()
+                Me.ReportViewer1.LocalReport.DataSources.Add(MyNewDataSource)
+                Me.ReportViewer1.LocalReport.Refresh()
+                Me.ReportViewer1.RefreshReport()
+                clear_data()
+                choose = 0
+            Case 7
+                'เลือกแผนก ประเภท และสถานะใช้งาน
+                adapter.FillByDepartTypeStatus(table, cmb_depart.Text, cmb_type.Text, 0)
+                Me.ReportViewer1.LocalReport.ReportPath = "D:\Train\Computer_IT_sol\Computer_IT\rpt_device.rdlc"
+                Me.ReportViewer1.LocalReport.DataSources.Clear()
+                Me.ReportViewer1.LocalReport.DataSources.Add(MyNewDataSource)
+                Me.ReportViewer1.LocalReport.Refresh()
+                Me.ReportViewer1.RefreshReport()
+                clear_data()
+                choose = 0
+
+
+
+            Case 8
+                'เลือก แผนก และสถานะชำรุด
+                adapter.FillByDepartStatus(table, cmb_depart.Text, 1)
+                Me.ReportViewer1.LocalReport.ReportPath = "D:\Train\Computer_IT_sol\Computer_IT\rpt_device.rdlc"
+                Me.ReportViewer1.LocalReport.DataSources.Clear()
+                Me.ReportViewer1.LocalReport.DataSources.Add(MyNewDataSource)
+                Me.ReportViewer1.LocalReport.Refresh()
+                Me.ReportViewer1.RefreshReport()
+                clear_data()
+                choose = 0
+            Case 9
+                'เลือก แผนก และสถานะใช้งาน
+                adapter.FillByDepartStatus(table, cmb_depart.Text, 0)
+                Me.ReportViewer1.LocalReport.ReportPath = "D:\Train\Computer_IT_sol\Computer_IT\rpt_device.rdlc"
+                Me.ReportViewer1.LocalReport.DataSources.Clear()
+                Me.ReportViewer1.LocalReport.DataSources.Add(MyNewDataSource)
+                Me.ReportViewer1.LocalReport.Refresh()
+                Me.ReportViewer1.RefreshReport()
+                clear_data()
+                choose = 0
+            Case 10
+                'เลือกประเภท และสถานะชำรุด
+                adapter.FillByTypeStatus(table, cmb_type.Text, 1)
+                Me.ReportViewer1.LocalReport.ReportPath = "D:\Train\Computer_IT_sol\Computer_IT\rpt_device.rdlc"
+                Me.ReportViewer1.LocalReport.DataSources.Clear()
+                Me.ReportViewer1.LocalReport.DataSources.Add(MyNewDataSource)
+                Me.ReportViewer1.LocalReport.Refresh()
+                Me.ReportViewer1.RefreshReport()
+                clear_data()
+                choose = 0
+            Case 11
+                'เลือกประเภท และสถานะใช้งาน
+                adapter.FillByTypeStatus(table, cmb_type.Text, 0)
+                Me.ReportViewer1.LocalReport.ReportPath = "D:\Train\Computer_IT_sol\Computer_IT\rpt_device.rdlc"
+                Me.ReportViewer1.LocalReport.DataSources.Clear()
+                Me.ReportViewer1.LocalReport.DataSources.Add(MyNewDataSource)
+                Me.ReportViewer1.LocalReport.Refresh()
+                Me.ReportViewer1.RefreshReport()
+                clear_data()
+                choose = 0
+        End Select
+
+    End Sub
+End Class
